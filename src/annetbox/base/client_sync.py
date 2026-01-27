@@ -1,5 +1,6 @@
 import http
 import logging
+import atexit
 from abc import abstractmethod
 from collections.abc import Callable, Iterable
 from functools import wraps
@@ -233,7 +234,10 @@ class BaseNetboxClient(RequestsClient):
 
     def _init_pool(self, threads: int) -> _BasePool:
         if threads > 1:
-            return ThreadPool(processes=threads)
+            pool = ThreadPool(processes=threads)
+            atexit.register(pool.terminate)
+            return pool
+
         return FakePool()
 
 
